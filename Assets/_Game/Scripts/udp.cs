@@ -5,6 +5,8 @@ using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
 
+
+// TODO: The UDP GameObject must be made DontDestroyOnLoad() so that it persists when changing from start screen to game screen
 public class udp : MonoBehaviour
 {
     int port;
@@ -21,14 +23,14 @@ public class udp : MonoBehaviour
     private float eegChannel7;
     private float eegChannel8;
 
+    public bool eegActive = false;
+    private bool alreadyStarted = false;
+
     // Start is called before the first frame update
     void Start()
     {
         Debug.Log("Unicorn UDP Receiver Example");
         Debug.Log("----------------------------");
-
-
-        StartCoroutine(CommunicationCoroutine());
 
         try
         {
@@ -65,6 +67,22 @@ public class udp : MonoBehaviour
 
     private void Update()
     {
+        if (alreadyStarted == false)
+        {
+            if (socket.Poll(0, SelectMode.SelectRead))
+            {
+                Debug.Log("EEG signal found.. Starting client loop");
+                StartCoroutine(CommunicationCoroutine());
+                alreadyStarted = true;
+            }
+            else
+            {
+                Debug.Log("EEG signal not found... ");
+            }
+        }
+
+
+
         eegChannel1 = receiveBufferFloat[0];
         eegChannel2 = receiveBufferFloat[1];
         eegChannel3 = receiveBufferFloat[2];
@@ -74,7 +92,8 @@ public class udp : MonoBehaviour
         eegChannel7 = receiveBufferFloat[6];
         eegChannel8 = receiveBufferFloat[7];
 
-        Debug.Log(eegChannel1);
+        Debug.Log(eegChannel1 + ", " + eegChannel2 + ", " + eegChannel3 + ", " + eegChannel4 + ", "
+                + eegChannel5 + ", " + eegChannel6 + ", " + eegChannel7 + ", " + eegChannel8);
     }
 
     private IEnumerator CommunicationCoroutine()
@@ -88,6 +107,7 @@ public class udp : MonoBehaviour
 
                 if (numberOfBytesReceived > 0)
                 {
+                    eegActive = true; // sets eeg state to active
                     for (int i = 0; i < numberOfBytesReceived / sizeof(float); i++)
                     {
                         receiveBufferFloat[i] = BitConverter.ToSingle(receiveBufferByte, i * sizeof(float));
@@ -103,6 +123,7 @@ public class udp : MonoBehaviour
                     }
 
                 }
+                eegActive = false; // sets eeg state to non-active
             }
             catch (Exception ex)
             {
