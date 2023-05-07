@@ -26,6 +26,26 @@ public class udp : MonoBehaviour
     public bool eegActive = false;
     private bool alreadyStarted = false;
 
+    public static udp Instance;
+
+    // dont destroy on load
+    void Awake()
+    {
+        // Check if an instance of this object already exists
+        if (Instance == null)
+        {
+            // Set the current object as the instance
+            Instance = this;
+            // Prevent this object from being destroyed when a new scene is loaded
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            // Destroy this object if another instance already exists
+            Destroy(gameObject);
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {

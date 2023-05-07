@@ -13,6 +13,8 @@ public class Asteroid : MonoBehaviour
     private Rigidbody rb;
     private Camera mainCam;
     private float maxSpeed;
+    private float maxDamage;
+    private int incDamage;
 
     void Start()
     {
@@ -23,6 +25,8 @@ public class Asteroid : MonoBehaviour
         rotationX = Random.Range(-maxRotation, maxRotation);
         rotationY = Random.Range(-maxRotation, maxRotation);
         rotationZ = Random.Range(-maxRotation, maxRotation);
+
+        maxDamage = 25f;
 
         rb = rock.GetComponent<Rigidbody>();
 
@@ -42,6 +46,16 @@ public class Asteroid : MonoBehaviour
         float finalSpeedY = speedY * dirY;
         rb.AddForce(transform.up * finalSpeedY);
 
+        // damage calculation, based on speed of asteroid
+        // incDamage = Mathf.RoundToInt(Mathf.Clamp(Mathf.Abs(finalSpeedX) + Mathf.Abs(finalSpeedY), 0f, maxDamage));
+        
+        float speedMagnitude = new Vector2(finalSpeedX, finalSpeedY).magnitude;
+
+        // Calculate the normalized speed value between 0 and 1
+        float normalizedSpeed = Mathf.Clamp01((speedMagnitude - 200) / (800 - 200));
+
+        // Calculate the damage using linear interpolation
+        incDamage = Mathf.RoundToInt(Mathf.Lerp(0f, maxDamage, normalizedSpeed));
     }
 
     void Update()
@@ -70,6 +84,7 @@ public class Asteroid : MonoBehaviour
         if (collisionInfo.collider.name == "Rocket")
         {
             gameplay.GetComponent<Gameplay>().RocketFail();
+            gameplay.GetComponent<Gameplay>().DecreaseHP(incDamage);
         }
     }
 
