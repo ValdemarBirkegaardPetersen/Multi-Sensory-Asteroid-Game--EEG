@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.00012298794, g: 0.0001218597, b: 0.0001268423, a: 1}
+  m_IndirectSpecularColor: {r: 0.00011070147, g: 0.00010126565, b: 0.000093685405, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -7100,7 +7100,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numAsteroids: 0
-  startingNumAsteroids: 10
+  startingNumAsteroids: 5
   asteroid: {fileID: 598131616}
   asteroidSpawnTime: 5
   scoreText: {fileID: 172248047}

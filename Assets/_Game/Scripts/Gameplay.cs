@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class Gameplay : MonoBehaviour
 {
     public int numAsteroids = 0;
-    public int startingNumAsteroids = 4;
+    public int startingNumAsteroids;
     // public GameObject bullet;
     public GameObject asteroid;
     // public GameObject asteroidContainer;
@@ -16,12 +16,14 @@ public class Gameplay : MonoBehaviour
     public float asteroidSpawnTime = 5.0f;
     private float lastAsteroidSpawnTime = 0.0f;
 
-
     public TMP_Text scoreText;
     public float score = 0;
 
     public TMP_Text hpText;
     public int hp;
+
+    public float spawnRateEngagement;
+    private GameObject udp;
 
 
     private void Start()
@@ -30,13 +32,37 @@ public class Gameplay : MonoBehaviour
         
         asteroid.SetActive(false);
         CreateAsteroids(startingNumAsteroids);
-        startingNumAsteroids = 100;
         hp = 100;
+
+        // log start of gameplay
+        udp = GameObject.FindWithTag("x");
+        udp.GetComponent<udp>().logStart();
+
     }
 
 
     private void Update()
     {
+        // solution 1 - eeg spawn rate handling
+        spawnRateEngagement = Mathf.Clamp(udp.GetComponent<udp>().spawnRateEEG, 0f, 2f);
+        float trp = (spawnRateEngagement * 5);
+        Debug.Log("trp  " + trp);
+        asteroidSpawnTime = Mathf.Clamp(trp, 2f, 10f);
+
+
+        // solution 2 - eeg spawn rate handling
+        /*
+        float maxEngagement = 10f;
+        float maxAdjustmentFactor = 10f;
+        float minAdjustmentFactor = 2f;
+        float adjustmentFactor = (trp - 1) * (maxAdjustmentFactor - minAdjustmentFactor) / (maxEngagement - 1) + minAdjustmentFactor;
+
+        float adjustedSpawnTime = 2 * adjustmentFactor;
+
+
+        asteroidSpawnTime = adjustedSpawnTime;
+        */
+
         CheckForRocketDeath();
 
         RenderSettings.skybox.SetFloat("_Rotation", Time.time * 0.8f);
@@ -54,11 +80,6 @@ public class Gameplay : MonoBehaviour
             lastAsteroidSpawnTime = Time.time;
 
             // Implementation for spawn over time
-            if (Time.time > 30.0f)
-            {
-                asteroidSpawnTime = 2.5f;
-            }
-            Debug.Log(asteroidSpawnTime);
             CreateAsteroids(1);
         }
 
@@ -99,6 +120,12 @@ public class Gameplay : MonoBehaviour
         {
             // Rocket destroyed
             Debug.Log("Rocket dead.");
+
+            // logging death
+            GameObject udp = GameObject.FindWithTag("x");
+            udp.GetComponent<udp>().logDeath();
+
+            // loading scene
             SceneManager.LoadScene("End Scene");
         }
     }
