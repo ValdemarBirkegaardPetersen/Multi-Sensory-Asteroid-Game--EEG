@@ -28,6 +28,9 @@ public class udp : MonoBehaviour
 
     public static udp Instance;
 
+    List<float> EEGvalues = new List<float>();
+
+
     // dont destroy on load
     void Awake()
     {
@@ -97,12 +100,15 @@ public class udp : MonoBehaviour
             }
             else
             {
-                Debug.Log("EEG signal not found... ");
+                //Debug.Log("EEG signal not found... ");
             }
         }
 
 
-
+        Debug.Log(EEGvalues[0]);
+        EEGvalues.Clear();  
+        
+        /*
         eegChannel1 = receiveBufferFloat[0];
         eegChannel2 = receiveBufferFloat[1];
         eegChannel3 = receiveBufferFloat[2];
@@ -114,8 +120,11 @@ public class udp : MonoBehaviour
 
         Debug.Log(eegChannel1 + ", " + eegChannel2 + ", " + eegChannel3 + ", " + eegChannel4 + ", "
                 + eegChannel5 + ", " + eegChannel6 + ", " + eegChannel7 + ", " + eegChannel8);
+        */
     }
 
+    // UDP NORMAL VERSION //
+    /*
     private IEnumerator CommunicationCoroutine()
     {
         while (true)
@@ -124,25 +133,26 @@ public class udp : MonoBehaviour
             try
             {
                 int numberOfBytesReceived = socket.Receive(receiveBufferByte);
+                Debug.Log("Number of bytes received: " + numberOfBytesReceived.ToString());
 
                 if (numberOfBytesReceived > 0)
                 {
                     eegActive = true; // sets eeg state to active
+
+                    Debug.Log("Number of bytes received / sizeof(float): " + numberOfBytesReceived / sizeof(float));
+                    
                     for (int i = 0; i < numberOfBytesReceived / sizeof(float); i++)
                     {
                         receiveBufferFloat[i] = BitConverter.ToSingle(receiveBufferByte, i * sizeof(float));
-                        if (i + 1 < numberOfBytesReceived / sizeof(float))
-                        {
-                            //Debug.Log(receiveBufferFloat[i].ToString("n2"));
+                        if (i + 1 < numberOfBytesReceived / sizeof(float)) {
+                            Debug.Log(i.ToString() + ": " + receiveBufferFloat[i].ToString("n2"));
                         }
-                        else
-                        {
-                            
-                            //Debug.Log(receiveBufferFloat[i].ToString("n2"));
+                        else {
+                            Debug.Log(i.ToString() + ": " + receiveBufferFloat[i].ToString("n2"));
                         }
                     }
-
                 }
+
                 eegActive = false; // sets eeg state to non-active
             }
             catch (Exception ex)
@@ -155,6 +165,55 @@ public class udp : MonoBehaviour
             yield return null;
         }
     }
+    */
+
+    // UDP BANDPOWER VERSION //
+
+    private IEnumerator CommunicationCoroutine()
+    {
+        while (true)
+        {
+            try { 
+                int numberOfBytesReceived = socket.Receive(receiveBufferByte);
+                if (numberOfBytesReceived > 0)
+                {
+                    eegActive = true; // sets eeg state to active
+                    byte[] messageByte = new byte[numberOfBytesReceived];
+                    Array.Copy(receiveBufferByte, messageByte, numberOfBytesReceived);
+                    string message = System.Text.Encoding.ASCII.GetString(messageByte);
+
+
+                    string[] splitValues = message.Split(',');
+
+                    foreach (string value in splitValues)
+                    {
+                        float floatValue;
+                        if (float.TryParse(value, out floatValue))
+                        {
+                            EEGvalues.Add(floatValue);
+                        }
+                        else
+                        {
+                            // Handle invalid values or parsing errors
+                        }
+                    }
+
+                } 
+                else
+                {
+                    eegActive = false; // sets eeg state to non-active
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("Error: " + ex.Message);
+            }
+
+        // Wait for one frame before sending another message
+        yield return null;
+        }
+    }
+
 
     private void OnDestroy()
     {

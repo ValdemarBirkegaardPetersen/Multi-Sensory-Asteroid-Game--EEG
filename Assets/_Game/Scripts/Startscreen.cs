@@ -18,7 +18,6 @@ public class Startscreen : MonoBehaviour
     void Update()
     {
         eegRunning = UDP.GetComponent<udp>().eegActive;
-        Debug.Log(eegRunning);
 
         // if mouse button and eeg signal is active then start game
         if ((Input.GetMouseButton(0) || Input.GetKeyDown(KeyCode.Space)) && eegRunning)
