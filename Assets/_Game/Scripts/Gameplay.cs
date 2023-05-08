@@ -43,11 +43,15 @@ public class Gameplay : MonoBehaviour
 
     private void Update()
     {
+        // BIG QUESTION. SHOULD IT BECOME SLOWER WHEN MORE ENGAGED OR FASTER?
+
         // solution 1 - eeg spawn rate handling
         spawnRateEngagement = Mathf.Clamp(udp.GetComponent<udp>().spawnRateEEG, 0f, 2f);
-        float trp = (spawnRateEngagement * 5);
-        Debug.Log("trp  " + trp);
-        asteroidSpawnTime = Mathf.Clamp(trp, 2f, 10f);
+        //float spawnRateEngagementAmplifed = (spawnRateEngagement * 5); // this version might be too fast because the normal avg is around 0.4-0.7 
+        float spawnRateEngagementAmplifed = (spawnRateEngagement * 7); // this version might be more balanced as it creates a bigger gap between slow and fast
+        
+        Debug.Log("trp  " + spawnRateEngagementAmplifed);
+        asteroidSpawnTime = Mathf.Clamp(spawnRateEngagementAmplifed, 2f, 10f);
 
 
         // solution 2 - eeg spawn rate handling
